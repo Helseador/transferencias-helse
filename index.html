@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Consentimiento - Registro de Transferencias de Valor</title>
     <style>
         * {
@@ -31,7 +31,49 @@
             padding: 50px 60px;
         }
 
-        /* Títulos y estructura */
+        /* Estilos del logo */
+        .logo-container {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e6ed;
+        }
+        
+        .logo-img {
+            max-width: 200px;
+            height: auto;
+            display: inline-block;
+        }
+        
+        /* Versión texto del logo (por si no tienes la imagen a la mano) */
+        .logo-text {
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .logo-text .big-h {
+            font-size: 48px;
+            font-weight: 800;
+            color: #0b5e7e;
+            letter-spacing: -2px;
+            line-height: 1;
+        }
+        
+        .logo-text .helse-name {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1f4e6e;
+            letter-spacing: 2px;
+        }
+        
+        .logo-text .tagline {
+            font-size: 12px;
+            color: #6c9ebf;
+            letter-spacing: 2px;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
         h1 {
             font-size: 20px;
             text-align: center;
@@ -58,27 +100,9 @@
             color: #0b3b4f;
         }
 
-        h3 {
-            font-size: 16px;
-            margin: 20px 0 8px 0;
-            font-weight: 700;
-            color: #1e4a6e;
-        }
-
         p {
             margin-bottom: 12px;
             text-align: justify;
-        }
-
-        .bold {
-            font-weight: 700;
-        }
-
-        .underline-space {
-            display: inline-block;
-            min-width: 180px;
-            border-bottom: 1px solid #000;
-            margin: 0 8px;
         }
 
         .signature-area {
@@ -122,11 +146,90 @@
             color: #1f3b43;
         }
 
-        .signature-line {
-            border-bottom: 1.5px solid #2c3e50;
-            margin-top: 30px;
-            margin-bottom: 8px;
+        .signature-field input, .signature-field textarea {
             width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #bdc4c8;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: 0.2s;
+        }
+
+        .signature-field input:focus, .signature-field textarea:focus {
+            outline: none;
+            border-color: #2c7da0;
+            box-shadow: 0 0 0 2px rgba(44,125,160,0.2);
+        }
+
+        .canvas-signature-container {
+            margin-top: 20px;
+            border: 2px solid #2c7da0;
+            border-radius: 12px;
+            padding: 15px;
+            background: white;
+        }
+
+        .canvas-signature-container label {
+            font-weight: 700;
+            display: block;
+            margin-bottom: 12px;
+            font-size: 15px;
+            color: #0b5e7e;
+        }
+
+        canvas {
+            border: 1px solid #adb5bd;
+            border-radius: 8px;
+            background-color: white;
+            cursor: crosshair;
+            width: 100%;
+            height: auto;
+            touch-action: none;
+        }
+
+        .signature-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-sign {
+            background-color: #e9ecef;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-sign.clear-btn {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .btn-sign.clear-btn:hover {
+            background-color: #f5c6cb;
+        }
+
+        .btn-sign.save-sign-btn {
+            background-color: #2c7da0;
+            color: white;
+        }
+
+        .btn-sign.save-sign-btn:hover {
+            background-color: #1f5e7a;
+        }
+
+        .legal-note {
+            background: #f1f9fe;
+            padding: 12px 18px;
+            border-radius: 10px;
+            margin: 20px 0 0;
+            font-size: 14px;
         }
 
         .signature-note {
@@ -138,7 +241,7 @@
 
         .print-button {
             text-align: center;
-            margin: 20px 0 10px;
+            margin: 25px 0 10px;
         }
 
         .btn-print {
@@ -151,7 +254,6 @@
             cursor: pointer;
             font-weight: 600;
             transition: background 0.2s;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
         .btn-print:hover {
@@ -185,31 +287,39 @@
             margin-bottom: 6px;
             text-align: justify;
         }
-        .legal-note {
-            background: #f1f9fe;
-            padding: 12px 18px;
-            border-radius: 10px;
-            margin: 15px 0;
-            font-size: 14px;
-        }
     </style>
 </head>
 <body>
 <div class="document-container">
     <div class="document-content">
+        
+        <!-- LOGO EN LA PARTE SUPERIOR -->
+        <div class="logo-container">
+            <!-- Versión con imagen real (si tienes el archivo LOGO HELSE.jpg en la misma carpeta) -->
+            <!-- 
+            <img src="LOGO HELSE.jpg" alt="Logo Helse" class="logo-img">
+            -->
+            
+            <!-- Versión con texto estilizado (basado en el contenido que compartiste: H / Helse / Enjoy Life) -->
+            <div class="logo-text">
+                <div class="big-h">H</div>
+                <div class="helse-name">Helse</div>
+                <div class="tagline">Enjoy Life</div>
+            </div>
+        </div>
+        
         <div class="anexo">ANEXO No. 1</div>
         <h1>CONSENTIMIENTO PARA EL REGISTRO DE TRANSFERENCIAS DE VALOR DEL SECTOR SALUD</h1>
 
         <p>Por la suscripción del presente documento, autorizo de manera expresa, previa, libre, voluntaria, informada e inequívoca a:</p>
 
-        <p><strong>GRUPO HELSE S.A.S.</strong>, sociedad legalmente constituida conforme a las leyes de la República de Colombia, identificada con NIT <span class="underline-space"></span>, con domicilio principal en la ciudad de <span class="underline-space"></span> (en adelante "GRUPO HELSE"), para que, en su calidad de Responsable del Tratamiento, trate mis datos personales de conformidad con lo dispuesto en la Ley 1581 de 2012, el Decreto 1377 de 2013, el Decreto 1074 de 2015, la Resolución 2881 de 2018 del Ministerio de Salud y Protección Social y las demás normas que las modifiquen, adicionen o sustituyan.</p>
+        <p><strong>GRUPO HELSE S.A.S.</strong>, sociedad legalmente constituida conforme a las leyes de la República de Colombia, identificada con NIT <strong>901401880</strong>, con domicilio principal en la ciudad de <strong>Bogotá D.C., Carrera 68b #13-42</strong> (en adelante "GRUPO HELSE"), para que, en su calidad de Responsable del Tratamiento, trate mis datos personales de conformidad con lo dispuesto en la Ley 1581 de 2012, el Decreto 1377 de 2013, el Decreto 1074 de 2015, la Resolución 2881 de 2018 del Ministerio de Salud y Protección Social y las demás normas que las modifiquen, adicionen o sustituyan.</p>
 
         <h2>1. DEFINICIONES</h2>
-        <p>Para efectos del presente consentimiento, se entenderá por:</p>
         <p><strong>Transferencias de Valor:</strong> Cualquier pago, beneficio, apoyo económico o en especie, honorario, patrocinio, donación, financiación, reembolso de gastos, apoyo logístico, contraprestación contractual o incentivo, realizado directa o indirectamente por GRUPO HELSE a favor del Titular, relacionado con actividades científicas, académicas, comerciales, contractuales o de prestación de servicios en el sector salud.</p>
 
         <h2>2. DATOS PERSONALES OBJETO DEL TRATAMIENTO</h2>
-        <p>La presente autorización comprende el tratamiento de los siguientes datos personales, según aplique:</p>
+        <p>La presente autorización comprende el tratamiento de los siguientes datos personales:</p>
         <ul>
             <li>Nombre y apellidos</li>
             <li>Tipo y número de documento de identificación</li>
@@ -221,100 +331,195 @@
         </ul>
 
         <h2>3. TRATAMIENTO DE DATOS SENSIBLES</h2>
-        <p>En caso de que, de manera excepcional, el tratamiento involucre <strong>datos sensibles</strong>, estos serán tratados únicamente cuando resulte estrictamente necesario para el cumplimiento de una obligación legal o contractual, garantizando las medidas de seguridad reforzadas exigidas por la normativa vigente.</p>
+        <p>En caso de que el tratamiento involucre <strong>datos sensibles</strong>, serán tratados solo cuando sea estrictamente necesario para cumplir obligaciones legales o contractuales, garantizando medidas de seguridad reforzadas.</p>
 
         <h2>4. FINALIDAD DEL TRATAMIENTO</h2>
-        <p>Autorizo a GRUPO HELSE para que los datos personales objeto de este consentimiento sean tratados con las siguientes finalidades:</p>
         <ul>
-            <li>Dar cumplimiento a las obligaciones legales y regulatorias aplicables al sector salud, en especial las relacionadas con la transparencia en las relaciones entre los actores del sector salud y la industria farmacéutica, de tecnologías en salud o servicios asociados.</li>
-            <li>Reportar, suministrar y/o publicar información ante el Ministerio de Salud y Protección Social, o ante la entidad que este designe, relacionada con pagos o transferencias de valor efectuadas a mi favor, en el marco del Registro de Transferencias de Valor del Sector Salud, de conformidad con lo establecido en la Resolución 2881 de 2018 y demás normas que la modifiquen o complementen.</li>
-            <li>Conservar registros contables, contractuales, administrativos y legales necesarios para la gestión de la relación existente con GRUPO HELSE.</li>
-            <li>Atender requerimientos de autoridades administrativas o judiciales competentes.</li>
+            <li>Dar cumplimiento a obligaciones legales y regulatorias del sector salud, transparencia y relación con industria farmacéutica.</li>
+            <li>Reportar y publicar información ante el Ministerio de Salud (Resolución 2881 de 2018) sobre transferencias de valor.</li>
+            <li>Conservar registros contables, contractuales y administrativos.</li>
+            <li>Atender requerimientos de autoridades competentes.</li>
         </ul>
 
         <h2>5. PUBLICACIÓN DE LA INFORMACIÓN</h2>
-        <p>Reconozco y acepto que la información reportada podrá incluir, entre otros aspectos:</p>
-        <ul>
-            <li>El valor de los pagos o transferencias de valor realizados</li>
-            <li>La modalidad o concepto de dichos pagos o transferencias</li>
-        </ul>
-        <p>Dicha publicación se realizará exclusivamente para fines de transparencia, en cumplimiento de la normativa aplicable, y dentro de los límites legales vigentes.</p>
+        <p>La información reportada podrá incluir el valor de pagos o transferencias y la modalidad de los mismos, con fines exclusivos de transparencia y dentro de los límites legales.</p>
 
         <h2>6. TRANSFERENCIA Y TRANSMISIÓN DE DATOS</h2>
-        <p>Autorizo expresamente a GRUPO HELSE para <strong>transferir y/o transmitir mis datos personales</strong>, a nivel nacional o internacional, a terceros encargados del tratamiento, tales como proveedores tecnológicos, asesores contables, auditores, firmas legales, entidades afiliadas o aliados estratégicos, cuando ello sea necesario para el cumplimiento de las finalidades aquí descritas, garantizando niveles adecuados de protección de datos personales.</p>
+        <p>Autorizo a GRUPO HELSE para <strong>transferir y/o transmitir mis datos personales</strong> a nivel nacional o internacional a terceros encargados del tratamiento, como proveedores tecnológicos, contadores, auditores, firmas legales o aliados estratégicos.</p>
 
-        <h2>7. PLAZO DE CONSERVACIÓN DE LA INFORMACIÓN</h2>
-        <p>Los datos personales serán conservados <strong>durante el tiempo necesario para cumplir las finalidades del tratamiento</strong> y, posteriormente, por el término exigido por las normas contables, fiscales, contractuales y regulatorias aplicables.</p>
+        <h2>7. PLAZO DE CONSERVACIÓN</h2>
+        <p>Los datos se conservarán durante el tiempo necesario para cumplir las finalidades y posteriormente por los plazos exigidos por normas contables, fiscales y regulatorias.</p>
 
-        <h2>8. DERECHOS DEL TITULAR DE LOS DATOS</h2>
-        <p>Como titular de los datos personales, declaro conocer que me asisten los derechos previstos en la Constitución Política y en la Ley 1581 de 2012, en especial los siguientes:</p>
+        <h2>8. DERECHOS DEL TITULAR</h2>
         <ul>
-            <li>Conocer, actualizar y rectificar mis datos personales</li>
-            <li>Solicitar prueba de la presente autorización</li>
-            <li>Ser informado sobre el uso que se ha dado a mis datos</li>
-            <li>Presentar quejas ante la Superintendencia de Industria y Comercio (SIC)</li>
-            <li>Revocar la autorización y/o solicitar la supresión del dato, cuando no exista un deber legal o contractual que lo impida</li>
+            <li>Conocer, actualizar y rectificar mis datos personales.</li>
+            <li>Solicitar prueba de esta autorización.</li>
+            <li>Ser informado sobre el uso de mis datos.</li>
+            <li>Presentar quejas ante la Superintendencia de Industria y Comercio (SIC).</li>
+            <li>Revocar la autorización o solicitar la supresión del dato cuando no haya deber legal o contractual.</li>
         </ul>
 
         <h2>9. CANALES DE ATENCIÓN</h2>
-        <p>Los derechos anteriormente descritos podrán ejercerse a través de los canales dispuestos por GRUPO HELSE, en especial mediante el correo electrónico: <strong>correo@grupohelse.com</strong> (o el que la compañía defina para estos efectos).</p>
+        <p>Para ejercer sus derechos, el Titular puede contactar a GRUPO HELSE a través del correo electrónico: <strong>habeasdata@helse.com.co</strong></p>
 
         <h2>10. DECLARACIONES FINALES</h2>
-        <p>Declaro que:</p>
-        <ul>
-            <li>He sido informado de manera clara, expresa y suficiente sobre el tratamiento al que serán sometidos mis datos personales.</li>
-            <li>Conozco la finalidad del tratamiento y los derechos que me asisten como titular.</li>
-            <li>Otorgo esta autorización de forma libre y voluntaria.</li>
-        </ul>
+        <p>Declaro que he sido informado de manera clara y suficiente, conozco la finalidad del tratamiento y mis derechos, y otorgo esta autorización de forma libre y voluntaria.</p>
 
-        <!-- FIRMA MEJORADA / ESPACIO PARA FIRMAR -->
+        <!-- ÁREA DE FIRMA COMPLETA -->
         <div class="signature-area">
-            <div class="signature-title">✍️ FIRMA DEL TITULAR</div>
+            <div class="signature-title">✍️ FIRMA DEL TITULAR (CON FIRMA DIGITAL)</div>
+            
             <div class="signature-grid">
                 <div class="signature-field">
                     <label>Nombre completo del Titular</label>
-                    <div class="signature-line"></div>
-                    <div class="signature-note">Escriba su nombre completo con letra clara</div>
+                    <input type="text" id="fullName" placeholder="Ej: María Alejandra Pérez Gómez">
                 </div>
                 <div class="signature-field">
                     <label>Tipo y número de documento</label>
-                    <div class="signature-line"></div>
-                    <div class="signature-note">C.C., C.E., NIT, Pasaporte, etc.</div>
+                    <input type="text" id="idNumber" placeholder="C.C. 123456789">
                 </div>
             </div>
+
             <div class="signature-grid">
                 <div class="signature-field">
-                    <label>Firma (manuscrita o digital)</label>
-                    <div class="signature-line"></div>
-                    <div class="signature-note">Firme dentro del recuadro o sobre la línea</div>
+                    <label>Ciudad y fecha</label>
+                    <input type="text" id="cityDate" placeholder="Bogotá D.C., 03 de junio de 2026">
                 </div>
                 <div class="signature-field">
-                    <label>Fecha (día / mes / año)</label>
-                    <div class="signature-line"></div>
-                    <div class="signature-note">Ejemplo: 03 de junio de 2026</div>
+                    <label>Correo electrónico (opcional)</label>
+                    <input type="email" id="userEmail" placeholder="usuario@ejemplo.com">
                 </div>
             </div>
-            <div style="margin-top: 25px;">
-                <label>📌 Lugar (ciudad y país):</label>
-                <div class="signature-line" style="margin-top: 8px;"></div>
+
+            <!-- FIRMA CON CANVAS -->
+            <div class="canvas-signature-container">
+                <label>🖊️ Firma manuscrita digital (firme aquí dentro con el dedo o mouse):</label>
+                <canvas id="signatureCanvas" width="600" height="200" style="width:100%; height:auto; max-width:600px; border:1px solid #aaa; background:#fff; touch-action: none;"></canvas>
+                <div class="signature-buttons">
+                    <button class="btn-sign clear-btn" id="clearCanvasBtn">🗑️ Borrar firma</button>
+                    <button class="btn-sign save-sign-btn" id="saveSignatureData">✅ Guardar firma actual</button>
+                </div>
+                <div class="signature-note">
+                    * Para firmar: presione y arrastre el dedo (en móvil) o el mouse (en PC) dentro del recuadro blanco.
+                </div>
             </div>
-            <div class="legal-note" style="margin-top: 20px;">
-                <strong>Importante:</strong> Al firmar este documento, reconozco que he leído y comprendido todas las cláusulas anteriores, y otorgo mi consentimiento expreso para el tratamiento de mis datos personales conforme a la normativa colombiana.
+
+            <div class="legal-note">
+                <strong>Declaración de consentimiento:</strong> Al completar los campos y realizar la firma digital en el recuadro superior, acepto expresamente el tratamiento de mis datos personales según lo dispuesto en este documento. Esta firma tiene la misma validez que una firma autógrafa.
             </div>
         </div>
 
         <div class="print-button">
-            <button class="btn-print" onclick="window.print();">🖨️ Imprimir / Guardar como PDF</button>
+            <button class="btn-print" onclick="window.print();">🖨️ Imprimir / Guardar como PDF (con firma visible)</button>
         </div>
         <footer>
-            Documento generado para cumplimiento de la Resolución 2881 de 2018 y normas de protección de datos personales.
+            Grupo HELSE S.A.S. - NIT 901401880 | Cumplimiento Resolución 2881 de 2018 | habeasdata@helse.com.co
         </footer>
     </div>
 </div>
 
 <script>
-    // Pequeño detalle opcional: si se quiere limpiar o previsualizar, solo es estético.
-    console.log("Documento listo para firma y subida a GitHub");
+    (function() {
+        const canvas = document.getElementById('signatureCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            const maxWidth = Math.min(600, container.clientWidth - 20);
+            const oldData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            canvas.width = maxWidth;
+            canvas.height = 200;
+            ctx.putImageData(oldData, 0, 0);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#1a2c3e';
+        }
+        
+        let drawing = false;
+        
+        function getCoordinates(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            let clientX, clientY;
+            
+            if (e.touches) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+                e.preventDefault();
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            
+            let x = (clientX - rect.left) * scaleX;
+            let y = (clientY - rect.top) * scaleY;
+            x = Math.min(Math.max(0, x), canvas.width);
+            y = Math.min(Math.max(0, y), canvas.height);
+            return { x, y };
+        }
+        
+        function startDrawing(e) {
+            drawing = true;
+            const { x, y } = getCoordinates(e);
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            e.preventDefault();
+        }
+        
+        function draw(e) {
+            if (!drawing) return;
+            const { x, y } = getCoordinates(e);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            e.preventDefault();
+        }
+        
+        function stopDrawing() {
+            drawing = false;
+            ctx.beginPath();
+        }
+        
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseleave', stopDrawing);
+        
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
+        canvas.addEventListener('touchcancel', stopDrawing);
+        
+        document.getElementById('clearCanvasBtn').addEventListener('click', function() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#1a2c3e';
+        });
+        
+        document.getElementById('saveSignatureData').addEventListener('click', function() {
+            alert('✅ Firma guardada correctamente en el documento. Puede continuar e imprimir.');
+        });
+        
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#1a2c3e';
+        
+        const style = document.createElement('style');
+        style.innerHTML = `@media print { .btn-print, .signature-buttons { display: none; } canvas { border: 1px solid #ccc; } .signature-area { break-inside: avoid; } }`;
+        document.head.appendChild(style);
+    })();
 </script>
 </body>
 </html>
