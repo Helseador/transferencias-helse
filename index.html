@@ -31,7 +31,6 @@
             padding: 50px 60px;
         }
 
-        /* Estilos del logo */
         .logo-container {
             text-align: center;
             margin-bottom: 30px;
@@ -39,13 +38,6 @@
             border-bottom: 2px solid #e0e6ed;
         }
         
-        .logo-img {
-            max-width: 200px;
-            height: auto;
-            display: inline-block;
-        }
-        
-        /* Versión texto del logo (por si no tienes la imagen a la mano) */
         .logo-text {
             display: inline-block;
             text-align: center;
@@ -146,7 +138,7 @@
             color: #1f3b43;
         }
 
-        .signature-field input, .signature-field textarea {
+        .signature-field input {
             width: 100%;
             padding: 10px 12px;
             border: 1px solid #bdc4c8;
@@ -156,10 +148,14 @@
             transition: 0.2s;
         }
 
-        .signature-field input:focus, .signature-field textarea:focus {
+        .signature-field input:focus {
             outline: none;
             border-color: #2c7da0;
             box-shadow: 0 0 0 2px rgba(44,125,160,0.2);
+        }
+
+        .signature-field input.required {
+            border-left: 3px solid #dc3545;
         }
 
         .canvas-signature-container {
@@ -215,15 +211,6 @@
             background-color: #f5c6cb;
         }
 
-        .btn-sign.save-sign-btn {
-            background-color: #2c7da0;
-            color: white;
-        }
-
-        .btn-sign.save-sign-btn:hover {
-            background-color: #1f5e7a;
-        }
-
         .legal-note {
             background: #f1f9fe;
             padding: 12px 18px;
@@ -260,6 +247,33 @@
             background-color: #1f5e7a;
         }
 
+        .btn-submit {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            font-size: 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+            margin-right: 10px;
+        }
+
+        .btn-submit:hover {
+            background-color: #218838;
+        }
+
+        .btn-submit:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .action-buttons {
+            text-align: center;
+            margin: 20px 0 10px;
+        }
+
         footer {
             text-align: center;
             margin-top: 30px;
@@ -287,20 +301,40 @@
             margin-bottom: 6px;
             text-align: justify;
         }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .toast-notification {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #28a745;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            text-align: center;
+            max-width: 90%;
+        }
+        .toast-notification.error {
+            background-color: #dc3545;
+        }
     </style>
 </head>
 <body>
 <div class="document-container">
     <div class="document-content">
         
-        <!-- LOGO EN LA PARTE SUPERIOR -->
         <div class="logo-container">
-            <!-- Versión con imagen real (si tienes el archivo LOGO HELSE.jpg en la misma carpeta) -->
-            <!-- 
-            <img src="LOGO HELSE.jpg" alt="Logo Helse" class="logo-img">
-            -->
-            
-            <!-- Versión con texto estilizado (basado en el contenido que compartiste: H / Helse / Enjoy Life) -->
             <div class="logo-text">
                 <div class="big-h">H</div>
                 <div class="helse-name">Helse</div>
@@ -367,50 +401,46 @@
 
         <!-- ÁREA DE FIRMA COMPLETA -->
         <div class="signature-area">
-            <div class="signature-title">✍️ FIRMA DEL TITULAR (CON FIRMA DIGITAL)</div>
+            <div class="signature-title">✍️ FIRMA DEL TITULAR</div>
             
             <div class="signature-grid">
                 <div class="signature-field">
-                    <label>Nombre completo del Titular</label>
+                    <label>Nombre completo del Titular *</label>
                     <input type="text" id="fullName" placeholder="Ej: María Alejandra Pérez Gómez">
                 </div>
                 <div class="signature-field">
-                    <label>Tipo y número de documento</label>
+                    <label>Tipo y número de documento *</label>
                     <input type="text" id="idNumber" placeholder="C.C. 123456789">
                 </div>
             </div>
 
             <div class="signature-grid">
                 <div class="signature-field">
-                    <label>Ciudad y fecha</label>
+                    <label>Ciudad y fecha *</label>
                     <input type="text" id="cityDate" placeholder="Bogotá D.C., 03 de junio de 2026">
                 </div>
                 <div class="signature-field">
-                    <label>Correo electrónico (opcional)</label>
+                    <label>Correo electrónico *</label>
                     <input type="email" id="userEmail" placeholder="usuario@ejemplo.com">
                 </div>
             </div>
 
-            <!-- FIRMA CON CANVAS -->
             <div class="canvas-signature-container">
-                <label>🖊️ Firma manuscrita digital (firme aquí dentro con el dedo o mouse):</label>
+                <label>🖊️ Firma manuscrita digital *</label>
                 <canvas id="signatureCanvas" width="600" height="200" style="width:100%; height:auto; max-width:600px; border:1px solid #aaa; background:#fff; touch-action: none;"></canvas>
                 <div class="signature-buttons">
                     <button class="btn-sign clear-btn" id="clearCanvasBtn">🗑️ Borrar firma</button>
-                    <button class="btn-sign save-sign-btn" id="saveSignatureData">✅ Guardar firma actual</button>
-                </div>
-                <div class="signature-note">
-                    * Para firmar: presione y arrastre el dedo (en móvil) o el mouse (en PC) dentro del recuadro blanco.
                 </div>
             </div>
 
             <div class="legal-note">
-                <strong>Declaración de consentimiento:</strong> Al completar los campos y realizar la firma digital en el recuadro superior, acepto expresamente el tratamiento de mis datos personales según lo dispuesto en este documento. Esta firma tiene la misma validez que una firma autógrafa.
+                <strong>Declaración de consentimiento:</strong> Al hacer clic en "Enviar consentimiento", acepto expresamente el tratamiento de mis datos personales según lo dispuesto en este documento. La firma digital tiene la misma validez que una firma autógrafa.
             </div>
         </div>
 
-        <div class="print-button">
-            <button class="btn-print" onclick="window.print();">🖨️ Imprimir / Guardar como PDF (con firma visible)</button>
+        <div class="action-buttons">
+            <button class="btn-submit" id="submitBtn">📨 Enviar consentimiento</button>
+            <button class="btn-print" onclick="window.print();">🖨️ Imprimir</button>
         </div>
         <footer>
             Grupo HELSE S.A.S. - NIT 901401880 | Cumplimiento Resolución 2881 de 2018 | habeasdata@helse.com.co
@@ -418,108 +448,225 @@
     </div>
 </div>
 
+<div id="toastMsg" class="toast-notification"></div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
 <script>
-    (function() {
-        const canvas = document.getElementById('signatureCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        function resizeCanvas() {
-            const container = canvas.parentElement;
-            const maxWidth = Math.min(600, container.clientWidth - 20);
-            const oldData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            canvas.width = maxWidth;
-            canvas.height = 200;
-            ctx.putImageData(oldData, 0, 0);
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = '#1a2c3e';
-        }
-        
-        let drawing = false;
-        
-        function getCoordinates(e) {
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            let clientX, clientY;
-            
-            if (e.touches) {
-                clientX = e.touches[0].clientX;
-                clientY = e.touches[0].clientY;
-                e.preventDefault();
-            } else {
-                clientX = e.clientX;
-                clientY = e.clientY;
-            }
-            
-            let x = (clientX - rect.left) * scaleX;
-            let y = (clientY - rect.top) * scaleY;
-            x = Math.min(Math.max(0, x), canvas.width);
-            y = Math.min(Math.max(0, y), canvas.height);
-            return { x, y };
-        }
-        
-        function startDrawing(e) {
-            drawing = true;
-            const { x, y } = getCoordinates(e);
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.lineTo(x, y);
-            ctx.stroke();
-            e.preventDefault();
-        }
-        
-        function draw(e) {
-            if (!drawing) return;
-            const { x, y } = getCoordinates(e);
-            ctx.lineTo(x, y);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            e.preventDefault();
-        }
-        
-        function stopDrawing() {
-            drawing = false;
-            ctx.beginPath();
-        }
-        
-        canvas.addEventListener('mousedown', startDrawing);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseup', stopDrawing);
-        canvas.addEventListener('mouseleave', stopDrawing);
-        
-        canvas.addEventListener('touchstart', startDrawing);
-        canvas.addEventListener('touchmove', draw);
-        canvas.addEventListener('touchend', stopDrawing);
-        canvas.addEventListener('touchcancel', stopDrawing);
-        
-        document.getElementById('clearCanvasBtn').addEventListener('click', function() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = '#1a2c3e';
-        });
-        
-        document.getElementById('saveSignatureData').addEventListener('click', function() {
-            alert('✅ Firma guardada correctamente en el documento. Puede continuar e imprimir.');
-        });
-        
+    // ==================== CONFIGURACIÓN DE FIREBASE ====================
+    // ⚠️ REEMPLAZA ESTOS VALORES CON LOS DE TU PROYECTO FIREBASE ⚠️
+    const firebaseConfig = {
+        apiKey: "TU_API_KEY",
+        authDomain: "TU_PROJECT_ID.firebaseapp.com",
+        projectId: "TU_PROJECT_ID",
+        storageBucket: "TU_PROJECT_ID.appspot.com",
+        messagingSenderId: "TU_MESSAGING_SENDER_ID",
+        appId: "TU_APP_ID"
+    };
+
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // ==================== FIRMA DIGITAL CANVAS ====================
+    const canvas = document.getElementById('signatureCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    function resizeCanvas() {
+        const container = canvas.parentElement;
+        const maxWidth = Math.min(600, container.clientWidth - 40);
+        canvas.width = maxWidth;
+        canvas.height = 200;
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 2.5;
         ctx.strokeStyle = '#1a2c3e';
+    }
+    
+    let drawing = false;
+    
+    function getCoordinates(e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        let clientX, clientY;
         
-        const style = document.createElement('style');
-        style.innerHTML = `@media print { .btn-print, .signature-buttons { display: none; } canvas { border: 1px solid #ccc; } .signature-area { break-inside: avoid; } }`;
-        document.head.appendChild(style);
-    })();
+        if (e.touches) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+            e.preventDefault();
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
+        
+        let x = (clientX - rect.left) * scaleX;
+        let y = (clientY - rect.top) * scaleY;
+        x = Math.min(Math.max(0, x), canvas.width);
+        y = Math.min(Math.max(0, y), canvas.height);
+        return { x, y };
+    }
+    
+    function startDrawing(e) {
+        drawing = true;
+        const { x, y } = getCoordinates(e);
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        e.preventDefault();
+    }
+    
+    function draw(e) {
+        if (!drawing) return;
+        const { x, y } = getCoordinates(e);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        e.preventDefault();
+    }
+    
+    function stopDrawing() {
+        drawing = false;
+        ctx.beginPath();
+    }
+    
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseleave', stopDrawing);
+    
+    canvas.addEventListener('touchstart', startDrawing);
+    canvas.addEventListener('touchmove', draw);
+    canvas.addEventListener('touchend', stopDrawing);
+    canvas.addEventListener('touchcancel', stopDrawing);
+    
+    document.getElementById('clearCanvasBtn').addEventListener('click', function() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#1a2c3e';
+    });
+    
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // ==================== FUNCIONES DE VALIDACIÓN ====================
+    function isCanvasEmpty() {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const pixels = imageData.data;
+        for (let i = 0; i < pixels.length; i += 4) {
+            if (pixels[i+3] !== 0) return false;
+        }
+        return true;
+    }
+
+    function getSignatureImage() {
+        return canvas.toDataURL('image/png');
+    }
+
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toastMsg');
+        toast.textContent = message;
+        toast.className = 'toast-notification';
+        if (isError) toast.classList.add('error');
+        toast.style.display = 'block';
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 4000);
+    }
+
+    // ==================== ENVIAR A FIREBASE ====================
+    async function submitConsentimiento() {
+        const fullName = document.getElementById('fullName').value.trim();
+        const idNumber = document.getElementById('idNumber').value.trim();
+        const cityDate = document.getElementById('cityDate').value.trim();
+        const userEmail = document.getElementById('userEmail').value.trim();
+
+        // Validar campos
+        if (!fullName) {
+            showToast('❌ El nombre completo es obligatorio', true);
+            document.getElementById('fullName').focus();
+            return;
+        }
+        if (!idNumber) {
+            showToast('❌ El número de documento es obligatorio', true);
+            document.getElementById('idNumber').focus();
+            return;
+        }
+        if (!cityDate) {
+            showToast('❌ La ciudad y fecha son obligatorias', true);
+            document.getElementById('cityDate').focus();
+            return;
+        }
+        if (!userEmail) {
+            showToast('❌ El correo electrónico es obligatorio', true);
+            document.getElementById('userEmail').focus();
+            return;
+        }
+        if (!userEmail.includes('@')) {
+            showToast('❌ Ingrese un correo electrónico válido', true);
+            document.getElementById('userEmail').focus();
+            return;
+        }
+        if (isCanvasEmpty()) {
+            showToast('❌ Debe realizar su firma en el recuadro blanco', true);
+            return;
+        }
+
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Enviando...';
+
+        try {
+            const signatureImage = getSignatureImage();
+            
+            const docData = {
+                fullName: fullName,
+                idNumber: idNumber,
+                cityDate: cityDate,
+                userEmail: userEmail,
+                signatureImage: signatureImage,
+                submittedAt: new Date().toISOString(),
+                status: 'consentimiento_firmado'
+            };
+
+            await db.collection('consentimientos').add(docData);
+            
+            showToast('✅ Consentimiento enviado correctamente');
+            
+            // Limpiar formulario
+            document.getElementById('fullName').value = '';
+            document.getElementById('idNumber').value = '';
+            document.getElementById('cityDate').value = '';
+            document.getElementById('userEmail').value = '';
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('❌ Error al enviar: ' + error.message, true);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = '📨 Enviar consentimiento';
+        }
+    }
+
+    document.getElementById('submitBtn').addEventListener('click', submitConsentimiento);
+
+    // Estilos para impresión
+    const style = document.createElement('style');
+    style.innerHTML = `@media print { .action-buttons, .signature-buttons, .btn-submit, .btn-print, .toast-notification { display: none; } canvas { border: 1px solid #ccc; } .signature-area { break-inside: avoid; } }`;
+    document.head.appendChild(style);
 </script>
 </body>
 </html>
