@@ -300,71 +300,6 @@
             color: #6c757d;
         }
 
-        /* Estilos ocultos para el PDF */
-        .pdf-template {
-            position: fixed;
-            top: -9999px;
-            left: -9999px;
-            width: 800px;
-            background: white;
-            padding: 40px;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            line-height: 1.5;
-        }
-
-        .pdf-template .logo-pdf {
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #0b5e7e;
-            padding-bottom: 20px;
-        }
-
-        .pdf-template .logo-pdf .big-h-pdf {
-            font-size: 48px;
-            font-weight: 800;
-            color: #0b5e7e;
-        }
-
-        .pdf-template .logo-pdf .helse-name-pdf {
-            font-size: 28px;
-            font-weight: 700;
-            color: #1f4e6e;
-        }
-
-        .pdf-template h1 {
-            font-size: 18px;
-            text-align: center;
-            margin: 20px 0;
-            color: #0b3b4f;
-        }
-
-        .pdf-template .pdf-content {
-            margin-top: 20px;
-        }
-
-        .pdf-template .pdf-field {
-            margin-bottom: 15px;
-            border-bottom: 1px solid #dee2e6;
-            padding-bottom: 10px;
-        }
-
-        .pdf-template .pdf-label {
-            font-weight: 700;
-            width: 180px;
-            display: inline-block;
-        }
-
-        .pdf-template .pdf-signature {
-            margin-top: 30px;
-            text-align: center;
-        }
-
-        .pdf-template .pdf-signature img {
-            max-width: 300px;
-            border: 1px solid #ccc;
-            padding: 10px;
-        }
-
         @media (max-width: 700px) {
             .cards-container {
                 grid-template-columns: 1fr;
@@ -424,25 +359,11 @@
     <img id="modalImage" src="">
 </div>
 
-<!-- Plantilla oculta para PDF -->
-<div id="pdfTemplate" class="pdf-template">
-    <div class="logo-pdf">
-        <div class="big-h-pdf">H</div>
-        <div class="helse-name-pdf">Helse</div>
-        <div class="tagline-pdf" style="font-size: 12px; color: #6c9ebf;">Enjoy Life</div>
-    </div>
-    <h1>CONSENTIMIENTO PARA EL REGISTRO DE TRANSFERENCIAS DE VALOR DEL SECTOR SALUD</h1>
-    <div class="pdf-content" id="pdfContent">
-        <!-- El contenido se llenará dinámicamente -->
-    </div>
-</div>
-
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
 <script>
-    // ==================== CONFIGURACIÓN DE FIREBASE ====================
     const firebaseConfig = {
         apiKey: "AIzaSyAxtCqgN8Y8xtcylcI7S4wiY7XrfnoGrP8",
         authDomain: "transferencias-valor.firebaseapp.com",
@@ -470,18 +391,6 @@
         });
     }
 
-    function formatDateForPDF(dateString) {
-        if (!dateString) return 'Fecha no disponible';
-        const date = new Date(dateString);
-        return date.toLocaleString('es-CO', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    }
-
     function escapeHtml(text) {
         if (!text) return '';
         const div = document.createElement('div');
@@ -489,77 +398,231 @@
         return div.innerHTML;
     }
 
-    // Función para generar y descargar PDF individual
     async function downloadPDF(item) {
         const btn = document.querySelector(`.btn-pdf[data-id="${item.id}"]`);
         if (btn) {
             btn.disabled = true;
-            btn.textContent = '📄 Generando...';
+            btn.innerHTML = '⏳ Generando PDF...';
         }
 
         try {
-            const pdfContainer = document.getElementById('pdfTemplate').cloneNode(true);
-            pdfContainer.style.display = 'block';
-            pdfContainer.style.position = 'absolute';
-            pdfContainer.style.top = '0';
-            pdfContainer.style.left = '0';
-            pdfContainer.style.width = '800px';
-            pdfContainer.style.background = 'white';
-            
-            const content = pdfContainer.querySelector('#pdfContent');
-            
-            content.innerHTML = `
-                <div class="pdf-field">
-                    <span class="pdf-label">📌 Fecha de envío:</span>
-                    <span>${formatDateForPDF(item.submittedAt)}</span>
-                </div>
-                <div class="pdf-field">
-                    <span class="pdf-label">👤 Nombre completo:</span>
-                    <span>${escapeHtml(item.fullName) || 'No especificado'}</span>
-                </div>
-                <div class="pdf-field">
-                    <span class="pdf-label">🆔 Documento de identidad:</span>
-                    <span>${escapeHtml(item.idNumber) || 'No especificado'}</span>
-                </div>
-                <div class="pdf-field">
-                    <span class="pdf-label">📧 Correo electrónico:</span>
-                    <span>${escapeHtml(item.userEmail) || 'No especificado'}</span>
-                </div>
-                <div class="pdf-field">
-                    <span class="pdf-label">📍 Ciudad y fecha declarada:</span>
-                    <span>${escapeHtml(item.cityDate) || 'No especificado'}</span>
-                </div>
-                <div class="pdf-signature">
-                    <p><strong>🖊️ Firma del titular:</strong></p>
-                    <img src="${item.signatureImage || ''}" alt="Firma">
-                </div>
-                <div style="margin-top: 30px; font-size: 11px; color: #6c757d; text-align: center; border-top: 1px solid #dee2e6; padding-top: 15px;">
-                    Documento generado desde el Sistema de Registro de Transferencias de Valor.<br>
-                    Grupo HELSE S.A.S. - NIT 901401880 | Cumplimiento Resolución 2881 de 2018
-                </div>
+            const pdfContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Consentimiento ${item.idNumber}</title>
+                    <style>
+                        * {
+                            margin: 0;
+                            padding: 0;
+                            box-sizing: border-box;
+                        }
+                        body {
+                            font-family: 'Segoe UI', Arial, sans-serif;
+                            line-height: 1.5;
+                            padding: 40px;
+                            color: #212529;
+                        }
+                        .document-container {
+                            max-width: 1000px;
+                            margin: 0 auto;
+                            background: white;
+                        }
+                        .logo-container {
+                            text-align: center;
+                            margin-bottom: 30px;
+                            padding-bottom: 20px;
+                            border-bottom: 2px solid #0b5e7e;
+                        }
+                        .logo-text .big-h {
+                            font-size: 48px;
+                            font-weight: 800;
+                            color: #0b5e7e;
+                        }
+                        .logo-text .helse-name {
+                            font-size: 28px;
+                            font-weight: 700;
+                            color: #1f4e6e;
+                        }
+                        .logo-text .tagline {
+                            font-size: 12px;
+                            color: #6c9ebf;
+                        }
+                        h1 {
+                            font-size: 20px;
+                            text-align: center;
+                            text-transform: uppercase;
+                            margin: 20px 0 10px;
+                        }
+                        .anexo {
+                            text-align: center;
+                            font-weight: 700;
+                            font-size: 18px;
+                            margin-bottom: 20px;
+                        }
+                        h2 {
+                            font-size: 18px;
+                            margin: 25px 0 12px 0;
+                            border-left: 4px solid #0b5e7e;
+                            padding-left: 12px;
+                            color: #0b3b4f;
+                        }
+                        p {
+                            margin-bottom: 12px;
+                            text-align: justify;
+                        }
+                        ul {
+                            margin-left: 25px;
+                            margin-bottom: 16px;
+                        }
+                        li {
+                            margin-bottom: 6px;
+                        }
+                        .firmado-por {
+                            margin-top: 40px;
+                            border-top: 2px dashed #2c7da0;
+                            padding-top: 30px;
+                            background-color: #f8f9fc;
+                            padding: 25px 20px;
+                            border-radius: 12px;
+                        }
+                        .firmado-por h3 {
+                            text-align: center;
+                            color: #0b5e7e;
+                            margin-bottom: 20px;
+                        }
+                        .signature-img {
+                            max-width: 300px;
+                            border: 1px solid #ddd;
+                            padding: 10px;
+                            margin-top: 10px;
+                        }
+                        footer {
+                            text-align: center;
+                            margin-top: 40px;
+                            font-size: 11px;
+                            color: #6c757d;
+                            border-top: 1px solid #dee2e6;
+                            padding-top: 18px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="document-container">
+                        <div class="logo-container">
+                            <div class="logo-text">
+                                <div class="big-h">H</div>
+                                <div class="helse-name">Helse</div>
+                                <div class="tagline">Enjoy Life</div>
+                            </div>
+                        </div>
+                        
+                        <div class="anexo">ANEXO No. 1</div>
+                        <h1>CONSENTIMIENTO PARA EL REGISTRO DE TRANSFERENCIAS DE VALOR DEL SECTOR SALUD</h1>
+
+                        <p>Por la suscripción del presente documento, autorizo de manera expresa, previa, libre, voluntaria, informada e inequívoca a:</p>
+
+                        <p><strong>GRUPO HELSE S.A.S.</strong>, sociedad legalmente constituida conforme a las leyes de la República de Colombia, identificada con NIT <strong>901401880</strong>, con domicilio principal en la ciudad de <strong>Bogotá D.C., Carrera 68b #13-42</strong> (en adelante "GRUPO HELSE"), para que, en su calidad de Responsable del Tratamiento, trate mis datos personales de conformidad con lo dispuesto en la Ley 1581 de 2012, el Decreto 1377 de 2013, el Decreto 1074 de 2015, la Resolución 2881 de 2018 del Ministerio de Salud y Protección Social y las demás normas que las modifiquen, adicionen o sustituyan.</p>
+
+                        <h2>1. DEFINICIONES</h2>
+                        <p><strong>Transferencias de Valor:</strong> Cualquier pago, beneficio, apoyo económico o en especie, honorario, patrocinio, donación, financiación, reembolso de gastos, apoyo logístico, contraprestación contractual o incentivo, realizado directa o indirectamente por GRUPO HELSE a favor del Titular, relacionado con actividades científicas, académicas, comerciales, contractuales o de prestación de servicios en el sector salud.</p>
+
+                        <h2>2. DATOS PERSONALES OBJETO DEL TRATAMIENTO</h2>
+                        <p>La presente autorización comprende el tratamiento de los siguientes datos personales:</p>
+                        <ul>
+                            <li>Nombre y apellidos</li>
+                            <li>Tipo y número de documento de identificación</li>
+                            <li>Dirección física y electrónica</li>
+                            <li>Número de teléfono</li>
+                            <li>Ciudad y país de residencia</li>
+                            <li>Profesión, ocupación o razón social</li>
+                            <li>Información relacionada con pagos, transferencias de valor, apoyos económicos, honorarios, patrocinios, contraprestaciones o cualquier otro concepto análogo</li>
+                        </ul>
+
+                        <h2>3. TRATAMIENTO DE DATOS SENSIBLES</h2>
+                        <p>En caso de que el tratamiento involucre <strong>datos sensibles</strong>, serán tratados solo cuando sea estrictamente necesario para cumplir obligaciones legales o contractuales, garantizando medidas de seguridad reforzadas.</p>
+
+                        <h2>4. FINALIDAD DEL TRATAMIENTO</h2>
+                        <ul>
+                            <li>Dar cumplimiento a obligaciones legales y regulatorias del sector salud, transparencia y relación con industria farmacéutica.</li>
+                            <li>Reportar y publicar información ante el Ministerio de Salud (Resolución 2881 de 2018) sobre transferencias de valor.</li>
+                            <li>Conservar registros contables, contractuales y administrativos.</li>
+                            <li>Atender requerimientos de autoridades competentes.</li>
+                        </ul>
+
+                        <h2>5. PUBLICACIÓN DE LA INFORMACIÓN</h2>
+                        <p>La información reportada podrá incluir el valor de pagos o transferencias y la modalidad de los mismos, con fines exclusivos de transparencia y dentro de los límites legales.</p>
+
+                        <h2>6. TRANSFERENCIA Y TRANSMISIÓN DE DATOS</h2>
+                        <p>Autorizo a GRUPO HELSE para <strong>transferir y/o transmitir mis datos personales</strong> a nivel nacional o internacional a terceros encargados del tratamiento, como proveedores tecnológicos, contadores, auditores, firmas legales o aliados estratégicos.</p>
+
+                        <h2>7. PLAZO DE CONSERVACIÓN</h2>
+                        <p>Los datos se conservarán durante el tiempo necesario para cumplir las finalidades y posteriormente por los plazos exigidos por normas contables, fiscales y regulatorias.</p>
+
+                        <h2>8. DERECHOS DEL TITULAR</h2>
+                        <ul>
+                            <li>Conocer, actualizar y rectificar mis datos personales.</li>
+                            <li>Solicitar prueba de esta autorización.</li>
+                            <li>Ser informado sobre el uso de mis datos.</li>
+                            <li>Presentar quejas ante la Superintendencia de Industria y Comercio (SIC).</li>
+                            <li>Revocar la autorización o solicitar la supresión del dato cuando no haya deber legal o contractual.</li>
+                        </ul>
+
+                        <h2>9. CANALES DE ATENCIÓN</h2>
+                        <p>Para ejercer sus derechos, el Titular puede contactar a GRUPO HELSE a través del correo electrónico: <strong>habeasdata@helse.com.co</strong></p>
+
+                        <h2>10. DECLARACIONES FINALES</h2>
+                        <p>Declaro que he sido informado de manera clara y suficiente, conozco la finalidad del tratamiento y mis derechos, y otorgo esta autorización de forma libre y voluntaria.</p>
+
+                        <div class="firmado-por">
+                            <h3>✍️ DATOS DEL TITULAR QUE FIRMA EL CONSENTIMIENTO</h3>
+                            <p><strong>Nombre completo:</strong> ${escapeHtml(item.fullName) || 'No especificado'}</p>
+                            <p><strong>Documento de identidad:</strong> ${escapeHtml(item.idNumber) || 'No especificado'}</p>
+                            <p><strong>Correo electrónico:</strong> ${escapeHtml(item.userEmail) || 'No especificado'}</p>
+                            <p><strong>Ciudad y fecha declarada:</strong> ${escapeHtml(item.cityDate) || 'No especificado'}</p>
+                            <p><strong>Fecha de envío del consentimiento:</strong> ${formatDate(item.submittedAt)}</p>
+                            <p><strong>Firma del titular:</strong></p>
+                            <img class="signature-img" src="${item.signatureImage || ''}" alt="Firma">
+                        </div>
+
+                        <footer>
+                            Grupo HELSE S.A.S. - NIT 901401880 | Cumplimiento Resolución 2881 de 2018<br>
+                            Este documento fue generado automáticamente desde el Sistema de Registro de Transferencias de Valor.
+                        </footer>
+                    </div>
+                </body>
+                </html>
             `;
+
+            const blob = new Blob([pdfContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
             
-            document.body.appendChild(pdfContainer);
-            
-            const opt = {
-                margin: [0.5, 0.5, 0.5, 0.5],
-                filename: `consentimiento_${item.idNumber}_${item.fullName.replace(/\s/g, '_')}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, letterRendering: true, useCORS: true, logging: false },
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            iframe.onload = function() {
+                html2pdf().set({
+                    margin: [0.5, 0.5, 0.5, 0.5],
+                    filename: `consentimiento_${item.idNumber}_${item.fullName.replace(/\s/g, '_')}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, letterRendering: true, useCORS: true },
+                    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+                }).from(iframe.contentWindow.document.body).save().then(() => {
+                    document.body.removeChild(iframe);
+                    URL.revokeObjectURL(url);
+                });
             };
             
-            await html2pdf().set(opt).from(pdfContainer).save();
-            
-            document.body.removeChild(pdfContainer);
+            iframe.src = url;
             
         } catch (error) {
-            console.error('Error generando PDF:', error);
+            console.error('Error:', error);
             alert('Error al generar el PDF. Intenta nuevamente.');
         } finally {
             if (btn) {
                 btn.disabled = false;
-                btn.textContent = '📄 Descargar PDF';
+                btn.innerHTML = '📄 Descargar PDF';
             }
         }
     }
