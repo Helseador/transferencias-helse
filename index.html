@@ -154,12 +154,22 @@
             box-shadow: 0 0 0 2px rgba(44,125,160,0.2);
         }
 
+        .signature-field input.error-input {
+            border-color: #dc3545;
+            background-color: #fff8f8;
+        }
+
         .canvas-signature-container {
             margin-top: 20px;
             border: 2px solid #2c7da0;
             border-radius: 12px;
             padding: 15px;
             background: white;
+        }
+
+        .canvas-signature-container.error-canvas {
+            border-color: #dc3545;
+            background-color: #fff8f8;
         }
 
         .canvas-signature-container label {
@@ -315,6 +325,13 @@
         .toast-notification.error {
             background-color: #dc3545;
         }
+        
+        .error-message-small {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -393,10 +410,12 @@
                 <div class="signature-field">
                     <label>Nombre completo del Titular *</label>
                     <input type="text" id="fullName" placeholder="Ej: María Alejandra Pérez Gómez">
+                    <div class="error-message-small" id="errorName">El nombre es obligatorio</div>
                 </div>
                 <div class="signature-field">
                     <label>Tipo y número de documento *</label>
                     <input type="text" id="idNumber" placeholder="C.C. 123456789">
+                    <div class="error-message-small" id="errorId">El documento es obligatorio</div>
                 </div>
             </div>
 
@@ -404,19 +423,22 @@
                 <div class="signature-field">
                     <label>Ciudad y fecha *</label>
                     <input type="text" id="cityDate" placeholder="Bogotá D.C., 03 de junio de 2026">
+                    <div class="error-message-small" id="errorCityDate">La ciudad y fecha son obligatorias</div>
                 </div>
                 <div class="signature-field">
                     <label>Correo electrónico *</label>
                     <input type="email" id="userEmail" placeholder="usuario@ejemplo.com">
+                    <div class="error-message-small" id="errorEmail">Ingrese un correo válido</div>
                 </div>
             </div>
 
-            <div class="canvas-signature-container">
+            <div class="canvas-signature-container" id="canvasContainer">
                 <label>🖊️ Firma manuscrita digital *</label>
                 <canvas id="signatureCanvas" width="600" height="200" style="width:100%; height:auto; max-width:600px; border:1px solid #aaa; background:#fff; touch-action: none;"></canvas>
                 <div class="signature-buttons">
                     <button class="btn-sign clear-btn" id="clearCanvasBtn">🗑️ Borrar firma</button>
                 </div>
+                <div class="error-message-small" id="errorSignature">Debe realizar su firma en el recuadro blanco</div>
             </div>
 
             <div class="legal-note">
@@ -441,7 +463,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
 <script>
-    // ==================== CONFIGURACIÓN DE FIREBASE ====================
     const firebaseConfig = {
         apiKey: "AIzaSyAxtCqgN8Y8xtcylcI7S4wiY7XrfnoGrP8",
         authDomain: "transferencias-valor.firebaseapp.com",
@@ -452,7 +473,6 @@
         appId: "1:773666805445:web:15ccf148fb1cbd316fc2ac"
     };
 
-    // Inicializar Firebase
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
@@ -520,6 +540,7 @@
     function stopDrawing() {
         drawing = false;
         ctx.beginPath();
+        removeCanvasError();
     }
     
     canvas.addEventListener('mousedown', startDrawing);
@@ -540,17 +561,22 @@
         ctx.lineJoin = 'round';
         ctx.lineWidth = 2.5;
         ctx.strokeStyle = '#1a2c3e';
+        removeCanvasError();
     });
     
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // ==================== FUNCIONES DE VALIDACIÓN ====================
+    // ==================== VALIDACIONES ESTRICTAS ====================
     function isCanvasEmpty() {
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const pixels = imageData.data;
+        // Verificar si hay algún píxel que no sea blanco
         for (let i = 0; i < pixels.length; i += 4) {
-            if (pixels[i+3] !== 0) return false;
+            // Si no es blanco (255,255,255) y tiene opacidad
+            if (pixels[i] !== 255 || pixels[i+1] !== 255 || pixels[i+2] !== 255) {
+                return false;
+            }
         }
         return true;
     }
@@ -570,40 +596,82 @@
         }, 4000);
     }
 
-    // ==================== ENVIAR A REALTIME DATABASE ====================
+    function removeAllErrors() {
+        // Remover clases de error de inputs
+        document.getElementById('fullName').classList.remove('error-input');
+        document.getElementById('idNumber').classList.remove('error-input');
+        document.getElementById('cityDate').classList.remove('error-input');
+        document.getElementById('userEmail').classList.remove('error-input');
+        
+        // Ocultar mensajes de error
+        document.getElementById('errorName').style.display = 'none';
+        document.getElementById('errorId').style.display = 'none';
+        document.getElementById('errorCityDate').style.display = 'none';
+        document.getElementById('errorEmail').style.display = 'none';
+        document.getElementById('errorSignature').style.display = 'none';
+        
+        // Remover error del canvas
+        const canvasContainer = document.getElementById('canvasContainer');
+        canvasContainer.classList.remove('error-canvas');
+    }
+
+    function addError(elementId, errorId) {
+        document.getElementById(elementId).classList.add('error-input');
+        document.getElementById(errorId).style.display = 'block';
+    }
+
+    function addCanvasError() {
+        const canvasContainer = document.getElementById('canvasContainer');
+        canvasContainer.classList.add('error-canvas');
+        document.getElementById('errorSignature').style.display = 'block';
+    }
+
+    function removeCanvasError() {
+        const canvasContainer = document.getElementById('canvasContainer');
+        canvasContainer.classList.remove('error-canvas');
+        document.getElementById('errorSignature').style.display = 'none';
+    }
+
+    function validateEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+
     async function submitConsentimiento() {
+        removeAllErrors();
+        
         const fullName = document.getElementById('fullName').value.trim();
         const idNumber = document.getElementById('idNumber').value.trim();
         const cityDate = document.getElementById('cityDate').value.trim();
         const userEmail = document.getElementById('userEmail').value.trim();
 
+        let hasError = false;
+
         if (!fullName) {
-            showToast('❌ El nombre completo es obligatorio', true);
-            document.getElementById('fullName').focus();
-            return;
+            addError('fullName', 'errorName');
+            hasError = true;
         }
         if (!idNumber) {
-            showToast('❌ El número de documento es obligatorio', true);
-            document.getElementById('idNumber').focus();
-            return;
+            addError('idNumber', 'errorId');
+            hasError = true;
         }
         if (!cityDate) {
-            showToast('❌ La ciudad y fecha son obligatorias', true);
-            document.getElementById('cityDate').focus();
-            return;
+            addError('cityDate', 'errorCityDate');
+            hasError = true;
         }
-        if (!userEmail) {
-            showToast('❌ El correo electrónico es obligatorio', true);
-            document.getElementById('userEmail').focus();
-            return;
+        if (!userEmail || !validateEmail(userEmail)) {
+            addError('userEmail', 'errorEmail');
+            hasError = true;
         }
-        if (!userEmail.includes('@')) {
-            showToast('❌ Ingrese un correo electrónico válido', true);
-            document.getElementById('userEmail').focus();
-            return;
-        }
+        
+        // VALIDACIÓN ESTRICTA DE FIRMA
         if (isCanvasEmpty()) {
-            showToast('❌ Debe realizar su firma en el recuadro blanco', true);
+            addCanvasError();
+            hasError = true;
+        }
+
+        if (hasError) {
+            showToast('❌ Por favor complete todos los campos obligatorios, incluyendo la firma', true);
             return;
         }
 
@@ -629,6 +697,7 @@
             
             showToast('✅ Consentimiento enviado correctamente');
             
+            // Limpiar formulario después de enviar exitosamente
             document.getElementById('fullName').value = '';
             document.getElementById('idNumber').value = '';
             document.getElementById('cityDate').value = '';
