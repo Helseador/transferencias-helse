@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Consentimientos Helse</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
         * {
             margin: 0;
@@ -22,7 +23,6 @@
             margin: 0 auto;
         }
 
-        /* Header con logo */
         .header {
             background: white;
             border-radius: 12px;
@@ -96,7 +96,6 @@
             opacity: 0.9;
         }
 
-        /* Filtros */
         .filters {
             background: white;
             border-radius: 12px;
@@ -144,10 +143,9 @@
             background-color: #1f5e7a;
         }
 
-        /* Tarjetas de consentimientos */
         .cards-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
             gap: 25px;
         }
 
@@ -157,6 +155,8 @@
             overflow: hidden;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
         }
 
         .card:hover {
@@ -170,6 +170,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .card-header .date {
@@ -179,6 +181,7 @@
 
         .card-body {
             padding: 18px;
+            flex: 1;
         }
 
         .info-row {
@@ -222,6 +225,38 @@
             cursor: pointer;
         }
 
+        .card-footer {
+            padding: 15px 18px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-pdf {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+
+        .btn-pdf:hover {
+            background-color: #c82333;
+        }
+
+        .btn-pdf:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -263,6 +298,71 @@
             margin-top: 40px;
             font-size: 12px;
             color: #6c757d;
+        }
+
+        /* Estilos ocultos para el PDF */
+        .pdf-template {
+            position: fixed;
+            top: -9999px;
+            left: -9999px;
+            width: 800px;
+            background: white;
+            padding: 40px;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.5;
+        }
+
+        .pdf-template .logo-pdf {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #0b5e7e;
+            padding-bottom: 20px;
+        }
+
+        .pdf-template .logo-pdf .big-h-pdf {
+            font-size: 48px;
+            font-weight: 800;
+            color: #0b5e7e;
+        }
+
+        .pdf-template .logo-pdf .helse-name-pdf {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1f4e6e;
+        }
+
+        .pdf-template h1 {
+            font-size: 18px;
+            text-align: center;
+            margin: 20px 0;
+            color: #0b3b4f;
+        }
+
+        .pdf-template .pdf-content {
+            margin-top: 20px;
+        }
+
+        .pdf-template .pdf-field {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 10px;
+        }
+
+        .pdf-template .pdf-label {
+            font-weight: 700;
+            width: 180px;
+            display: inline-block;
+        }
+
+        .pdf-template .pdf-signature {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .pdf-template .pdf-signature img {
+            max-width: 300px;
+            border: 1px solid #ccc;
+            padding: 10px;
         }
 
         @media (max-width: 700px) {
@@ -324,6 +424,19 @@
     <img id="modalImage" src="">
 </div>
 
+<!-- Plantilla oculta para PDF -->
+<div id="pdfTemplate" class="pdf-template">
+    <div class="logo-pdf">
+        <div class="big-h-pdf">H</div>
+        <div class="helse-name-pdf">Helse</div>
+        <div class="tagline-pdf" style="font-size: 12px; color: #6c9ebf;">Enjoy Life</div>
+    </div>
+    <h1>CONSENTIMIENTO PARA EL REGISTRO DE TRANSFERENCIAS DE VALOR DEL SECTOR SALUD</h1>
+    <div class="pdf-content" id="pdfContent">
+        <!-- El contenido se llenará dinámicamente -->
+    </div>
+</div>
+
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
@@ -345,7 +458,6 @@
 
     let allData = [];
 
-    // ==================== FUNCIONES PRINCIPALES ====================
     function formatDate(dateString) {
         if (!dateString) return 'Fecha no disponible';
         const date = new Date(dateString);
@@ -356,6 +468,100 @@
             hour: '2-digit',
             minute: '2-digit'
         });
+    }
+
+    function formatDateForPDF(dateString) {
+        if (!dateString) return 'Fecha no disponible';
+        const date = new Date(dateString);
+        return date.toLocaleString('es-CO', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Función para generar y descargar PDF individual
+    async function downloadPDF(item) {
+        const btn = document.querySelector(`.btn-pdf[data-id="${item.id}"]`);
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = '📄 Generando...';
+        }
+
+        try {
+            const pdfContainer = document.getElementById('pdfTemplate').cloneNode(true);
+            pdfContainer.style.display = 'block';
+            pdfContainer.style.position = 'absolute';
+            pdfContainer.style.top = '0';
+            pdfContainer.style.left = '0';
+            pdfContainer.style.width = '800px';
+            pdfContainer.style.background = 'white';
+            
+            const content = pdfContainer.querySelector('#pdfContent');
+            
+            content.innerHTML = `
+                <div class="pdf-field">
+                    <span class="pdf-label">📌 Fecha de envío:</span>
+                    <span>${formatDateForPDF(item.submittedAt)}</span>
+                </div>
+                <div class="pdf-field">
+                    <span class="pdf-label">👤 Nombre completo:</span>
+                    <span>${escapeHtml(item.fullName) || 'No especificado'}</span>
+                </div>
+                <div class="pdf-field">
+                    <span class="pdf-label">🆔 Documento de identidad:</span>
+                    <span>${escapeHtml(item.idNumber) || 'No especificado'}</span>
+                </div>
+                <div class="pdf-field">
+                    <span class="pdf-label">📧 Correo electrónico:</span>
+                    <span>${escapeHtml(item.userEmail) || 'No especificado'}</span>
+                </div>
+                <div class="pdf-field">
+                    <span class="pdf-label">📍 Ciudad y fecha declarada:</span>
+                    <span>${escapeHtml(item.cityDate) || 'No especificado'}</span>
+                </div>
+                <div class="pdf-signature">
+                    <p><strong>🖊️ Firma del titular:</strong></p>
+                    <img src="${item.signatureImage || ''}" alt="Firma">
+                </div>
+                <div style="margin-top: 30px; font-size: 11px; color: #6c757d; text-align: center; border-top: 1px solid #dee2e6; padding-top: 15px;">
+                    Documento generado desde el Sistema de Registro de Transferencias de Valor.<br>
+                    Grupo HELSE S.A.S. - NIT 901401880 | Cumplimiento Resolución 2881 de 2018
+                </div>
+            `;
+            
+            document.body.appendChild(pdfContainer);
+            
+            const opt = {
+                margin: [0.5, 0.5, 0.5, 0.5],
+                filename: `consentimiento_${item.idNumber}_${item.fullName.replace(/\s/g, '_')}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, letterRendering: true, useCORS: true, logging: false },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            
+            await html2pdf().set(opt).from(pdfContainer).save();
+            
+            document.body.removeChild(pdfContainer);
+            
+        } catch (error) {
+            console.error('Error generando PDF:', error);
+            alert('Error al generar el PDF. Intenta nuevamente.');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = '📄 Descargar PDF';
+            }
+        }
     }
 
     function renderCards(data) {
@@ -372,7 +578,7 @@
         container.innerHTML = data.map(item => `
             <div class="card">
                 <div class="card-header">
-                    <strong>📄 ${item.idNumber || 'Sin documento'}</strong>
+                    <strong>📄 ${escapeHtml(item.idNumber) || 'Sin documento'}</strong>
                     <span class="date">${formatDate(item.submittedAt)}</span>
                 </div>
                 <div class="card-body">
@@ -397,15 +603,13 @@
                         <img class="signature-img" src="${item.signatureImage || ''}" alt="Firma" onclick="showModal('${item.signatureImage}')">
                     </div>
                 </div>
+                <div class="card-footer">
+                    <button class="btn-pdf" data-id="${item.id}" onclick="downloadPDF(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+                        📄 Descargar PDF
+                    </button>
+                </div>
             </div>
         `).join('');
-    }
-
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
     }
 
     function filterData() {
@@ -481,6 +685,10 @@
     document.getElementById('refreshBtn').addEventListener('click', loadData);
     document.getElementById('searchName').addEventListener('input', filterData);
     document.getElementById('filterDate').addEventListener('change', filterData);
+
+    window.downloadPDF = downloadPDF;
+    window.showModal = showModal;
+    window.closeModal = closeModal;
 
     loadData();
 </script>
