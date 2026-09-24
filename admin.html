@@ -581,6 +581,7 @@
                             <p><strong>Documento de identidad:</strong> ${escapeHtml(item.idNumber) || 'No especificado'}</p>
                             <p><strong>Correo electrónico:</strong> ${escapeHtml(item.userEmail) || 'No especificado'}</p>
                             <p><strong>Ciudad y fecha declarada:</strong> ${escapeHtml(item.cityDate) || 'No especificado'}</p>
+                            <p><strong>Nombre del producto:</strong> ${escapeHtml(item.productName) || 'No especificado'}</p>
                             <p><strong>Fecha de envío del consentimiento:</strong> ${formatDate(item.submittedAt)}</p>
                             <p><strong>Firma del titular:</strong></p>
                             <img class="signature-img" src="${item.signatureImage || ''}" alt="Firma">
@@ -660,6 +661,10 @@
                     <div class="info-row">
                         <div class="info-label">📍 Ciudad/Fecha:</div>
                         <div class="info-value">${escapeHtml(item.cityDate) || 'No especificado'}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">💊 Producto:</div>
+                        <div class="info-value">${escapeHtml(item.productName) || 'No especificado'}</div>
                     </div>
                     <div class="signature-preview">
                         <h4>🖊️ Firma:</h4>

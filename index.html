@@ -432,6 +432,14 @@
                 </div>
             </div>
 
+            <div class="signature-grid">
+                <div class="signature-field">
+                    <label>Nombre del producto *</label>
+                    <input type="text" id="productName" placeholder="Ej: Xarelto, Humira, Botox...">
+                    <div class="error-message-small" id="errorProduct">El nombre del producto es obligatorio</div>
+                </div>
+            </div>
+
             <div class="canvas-signature-container" id="canvasContainer">
                 <label>🖊️ Firma manuscrita digital *</label>
                 <canvas id="signatureCanvas" width="600" height="200" style="width:100%; height:auto; max-width:600px; border:1px solid #aaa; background:#fff; touch-action: none;"></canvas>
@@ -602,12 +610,14 @@
         document.getElementById('idNumber').classList.remove('error-input');
         document.getElementById('cityDate').classList.remove('error-input');
         document.getElementById('userEmail').classList.remove('error-input');
+        document.getElementById('productName').classList.remove('error-input');
         
         // Ocultar mensajes de error
         document.getElementById('errorName').style.display = 'none';
         document.getElementById('errorId').style.display = 'none';
         document.getElementById('errorCityDate').style.display = 'none';
         document.getElementById('errorEmail').style.display = 'none';
+        document.getElementById('errorProduct').style.display = 'none';
         document.getElementById('errorSignature').style.display = 'none';
         
         // Remover error del canvas
@@ -644,6 +654,7 @@
         const idNumber = document.getElementById('idNumber').value.trim();
         const cityDate = document.getElementById('cityDate').value.trim();
         const userEmail = document.getElementById('userEmail').value.trim();
+        const productName = document.getElementById('productName').value.trim();
 
         let hasError = false;
 
@@ -661,6 +672,10 @@
         }
         if (!userEmail || !validateEmail(userEmail)) {
             addError('userEmail', 'errorEmail');
+            hasError = true;
+        }
+        if (!productName) {
+            addError('productName', 'errorProduct');
             hasError = true;
         }
         
@@ -687,6 +702,7 @@
                 idNumber: idNumber,
                 cityDate: cityDate,
                 userEmail: userEmail,
+                productName: productName,
                 signatureImage: signatureImage,
                 submittedAt: new Date().toISOString(),
                 status: 'consentimiento_firmado'
@@ -702,6 +718,7 @@
             document.getElementById('idNumber').value = '';
             document.getElementById('cityDate').value = '';
             document.getElementById('userEmail').value = '';
+            document.getElementById('productName').value = '';
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#FFFFFF';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
