@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Consentimientos Helse</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -301,107 +300,6 @@
             color: #6c757d;
         }
 
-        .charts-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            margin-bottom: 25px;
-        }
-
-        .chart-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .chart-card h3 {
-            font-size: 15px;
-            font-weight: 700;
-            color: #0b3b4f;
-            margin-bottom: 16px;
-            border-left: 4px solid #0b5e7e;
-            padding-left: 10px;
-        }
-
-        .chart-wrapper {
-            position: relative;
-            height: 260px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .prescriptor-list {
-            max-height: 260px;
-            overflow-y: auto;
-        }
-
-        .prescriptor-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 10px;
-            border-radius: 8px;
-            margin-bottom: 6px;
-            background: #f8f9fa;
-            cursor: pointer;
-            transition: background 0.15s;
-            font-size: 13px;
-        }
-
-        .prescriptor-item:hover {
-            background: #e3f0f7;
-        }
-
-        .prescriptor-item.active {
-            background: #0b5e7e;
-            color: white;
-        }
-
-        .prescriptor-item .p-name {
-            font-weight: 600;
-            flex: 1;
-        }
-
-        .prescriptor-item .p-count {
-            background: #0b5e7e;
-            color: white;
-            border-radius: 20px;
-            padding: 2px 10px;
-            font-size: 12px;
-            font-weight: 700;
-            min-width: 30px;
-            text-align: center;
-        }
-
-        .prescriptor-item.active .p-count {
-            background: white;
-            color: #0b5e7e;
-        }
-
-        .btn-clear-filter {
-            background: #e9ecef;
-            border: none;
-            padding: 5px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-bottom: 10px;
-            display: none;
-        }
-
-        .btn-clear-filter:hover {
-            background: #dee2e6;
-        }
-
-        @media (max-width: 900px) {
-            .charts-section {
-                grid-template-columns: 1fr;
-            }
-        }
-
         @media (max-width: 700px) {
             .cards-container {
                 grid-template-columns: 1fr;
@@ -446,27 +344,7 @@
             <label>📅 Filtrar por fecha</label>
             <input type="date" id="filterDate">
         </div>
-        <div class="filter-group">
-            <label>👨‍⚕️ Filtrar por prescriptor</label>
-            <select id="filterPrescriptor">
-                <option value="">— Todos los prescriptores —</option>
-            </select>
-        </div>
         <button class="btn-refresh" id="refreshBtn">🔄 Actualizar</button>
-    </div>
-
-    <div class="charts-section">
-        <div class="chart-card">
-            <h3>🏥 Distribución por EPS / Ciudad</h3>
-            <div class="chart-wrapper">
-                <canvas id="epsChart"></canvas>
-            </div>
-        </div>
-        <div class="chart-card">
-            <h3>👨‍⚕️ Prescriptores — clic para filtrar</h3>
-            <button class="btn-clear-filter" id="clearPrescriptorBtn">✕ Quitar filtro</button>
-            <div class="prescriptor-list" id="prescriptorList"></div>
-        </div>
     </div>
 
     <div id="cardsContainer" class="cards-container">
@@ -500,8 +378,6 @@
     const database = firebase.database();
 
     let allData = [];
-    let epsChartInstance = null;
-    let activePrescriptor = null;
 
     function formatDate(dateString) {
         if (!dateString) return 'Fecha no disponible';
@@ -799,133 +675,14 @@
         `).join('');
     }
 
-    // ==================== GRÁFICA DONUT EPS/CIUDAD ====================
-    function extractCity(cityDate) {
-        if (!cityDate) return 'Sin ciudad';
-        // Tomar solo la parte antes de la coma o el primer número/fecha
-        const clean = cityDate.split(',')[0].split(/\d/)[0].trim();
-        return clean || 'Sin ciudad';
-    }
-
-    function renderEpsChart(data) {
-        const counts = {};
-        data.forEach(item => {
-            const city = extractCity(item.cityDate);
-            counts[city] = (counts[city] || 0) + 1;
-        });
-
-        const labels = Object.keys(counts);
-        const values = Object.values(counts);
-
-        const palette = [
-            '#0b5e7e','#2c7da0','#468faf','#61a5c2','#89c2d9',
-            '#a9d6e5','#1f4e6e','#34789b','#5fa8c8','#7ec8e3',
-            '#0d7192','#1a8fb5','#3aaecc','#5bbfd9','#82d4e8'
-        ];
-
-        const ctx = document.getElementById('epsChart').getContext('2d');
-
-        if (epsChartInstance) {
-            epsChartInstance.destroy();
-        }
-
-        epsChartInstance = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: values,
-                    backgroundColor: palette.slice(0, labels.length),
-                    borderWidth: 2,
-                    borderColor: '#fff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right',
-                        labels: {
-                            font: { size: 11 },
-                            padding: 10,
-                            boxWidth: 14
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(ctx) {
-                                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                                const pct = ((ctx.parsed / total) * 100).toFixed(1);
-                                return ` ${ctx.label}: ${ctx.parsed} (${pct}%)`;
-                            }
-                        }
-                    }
-                },
-                cutout: '60%'
-            }
-        });
-    }
-
-    // ==================== LISTA DE PRESCRIPTORES ====================
-    function renderPrescriptorList(data) {
-        const counts = {};
-        data.forEach(item => {
-            const name = (item.fullName || 'Sin nombre').trim();
-            counts[name] = (counts[name] || 0) + 1;
-        });
-
-        const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-
-        // Actualizar select
-        const select = document.getElementById('filterPrescriptor');
-        const currentVal = select.value;
-        select.innerHTML = '<option value="">— Todos los prescriptores —</option>';
-        sorted.forEach(([name]) => {
-            const opt = document.createElement('option');
-            opt.value = name;
-            opt.textContent = name;
-            if (name === currentVal) opt.selected = true;
-            select.appendChild(opt);
-        });
-
-        // Renderizar lista visual
-        const listEl = document.getElementById('prescriptorList');
-        listEl.innerHTML = sorted.map(([name, count]) => `
-            <div class="prescriptor-item ${activePrescriptor === name ? 'active' : ''}"
-                 onclick="togglePrescriptor('${name.replace(/'/g, "\\'")}')">
-                <span class="p-name">${escapeHtml(name)}</span>
-                <span class="p-count">${count}</span>
-            </div>
-        `).join('');
-
-        const clearBtn = document.getElementById('clearPrescriptorBtn');
-        clearBtn.style.display = activePrescriptor ? 'inline-block' : 'none';
-    }
-
-    function togglePrescriptor(name) {
-        if (activePrescriptor === name) {
-            activePrescriptor = null;
-            document.getElementById('filterPrescriptor').value = '';
-        } else {
-            activePrescriptor = name;
-            document.getElementById('filterPrescriptor').value = name;
-        }
-        filterData();
-    }
-
     function filterData() {
         const searchTerm = document.getElementById('searchName').value.toLowerCase();
         const filterDate = document.getElementById('filterDate').value;
-        const filterPrescriptor = document.getElementById('filterPrescriptor').value;
-
-        // Sincronizar activePrescriptor con el select
-        activePrescriptor = filterPrescriptor || null;
 
         let filtered = [...allData];
 
         if (searchTerm) {
-            filtered = filtered.filter(item =>
+            filtered = filtered.filter(item => 
                 (item.fullName && item.fullName.toLowerCase().includes(searchTerm)) ||
                 (item.idNumber && item.idNumber.toLowerCase().includes(searchTerm))
             );
@@ -939,21 +696,12 @@
             });
         }
 
-        if (activePrescriptor) {
-            filtered = filtered.filter(item =>
-                (item.fullName || '').trim() === activePrescriptor
-            );
-        }
-
         filtered.sort((a, b) => {
             const dateA = a.submittedAt ? new Date(a.submittedAt) : 0;
             const dateB = b.submittedAt ? new Date(b.submittedAt) : 0;
             return dateB - dateA;
         });
 
-        // Las gráficas siempre reflejan el subconjunto filtrado (excepto prescriptor para la lista)
-        renderEpsChart(filtered);
-        renderPrescriptorList(allData); // la lista muestra siempre todos para poder cambiar
         renderCards(filtered);
     }
 
@@ -1000,17 +748,10 @@
     document.getElementById('refreshBtn').addEventListener('click', loadData);
     document.getElementById('searchName').addEventListener('input', filterData);
     document.getElementById('filterDate').addEventListener('change', filterData);
-    document.getElementById('filterPrescriptor').addEventListener('change', filterData);
-    document.getElementById('clearPrescriptorBtn').addEventListener('click', function() {
-        activePrescriptor = null;
-        document.getElementById('filterPrescriptor').value = '';
-        filterData();
-    });
 
     window.downloadPDF = downloadPDF;
     window.showModal = showModal;
     window.closeModal = closeModal;
-    window.togglePrescriptor = togglePrescriptor;
 
     loadData();
 </script>
